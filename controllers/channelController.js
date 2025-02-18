@@ -3,50 +3,53 @@ import Channel from "../models/Channel.js";
 import User from "../models/User.js";
 
 export const createChannel = async (req, res) => {
-    // checking for all required fields 
-    if (!req.body.channelName) {
-        return res.status(400).json({ success: false, message: "channel name is required" });
-    }
-    if (!req.body.owner) {
-        return res.status(400).json({ success: false, message: "channel owner is required" });
-    }
-    if (!req.body.description) {
-        return res.status(400).json({ success: false, message: "channel description is required" });
-    }
-    if (!req.body.channelLogo) {
-        return res.status(400).json({ success: false, message: "channel logo is required" });
-    }
-    if (!req.body.channelBanner) {
-        return res.status(400).json({ success: false, message: "channel banner is required" });
-    }
-
-    // getting data from form
-
+    // Checking for all required fields
     const { channelName, owner, description, channelLogo, channelBanner } = req.body;
-    try {
-        const ownerMatch = await User.findOne({ _id: owner });
-        const channelMatch = await Channel.findOne({ channelName: channelName });
 
-        if (channelMatch) {
-            return res.status(400).json({ success: false, message: "channel name already taken !" });
-        }
+    if (!channelName || !owner || !description || !channelLogo || !channelBanner) {
+        return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    try {
+        const ownerMatch = await User.findById(owner);
+        const channelMatch = await Channel.findOne({ channelName });
 
         if (!ownerMatch) {
-            return res.status(403).json({ success: false, message: "invalid credentials" });
+            return res.status(403).json({ success: false, message: "Invalid user" });
         }
+
+        if (channelMatch) {
+            return res.status(400).json({ success: false, message: "Channel name already taken" });
+        }
+
+        // Check if the user already has a channel
+        if (ownerMatch.channel) {
+            return res.status(400).json({ success: false, message: "User can only have one channel" });
+        }
+
+        // Create the channel
         const channel = await Channel.create({ channelName, owner, description, channelLogo, channelBanner });
 
-        // populate user and update channel in user model to added channel 
-
-        ownerMatch.channel.push(channel._id);
+        // Update user with the new channel ID
+        ownerMatch.channel = channel._id;
         await ownerMatch.save();
-        res.status(201).json({ success: true, message: "channel created", channel });
+
+        // Fetch updated user details
+        const updatedUser = await User.findById(owner);
+
+        res.status(201).json({
+            success: true,
+            message: "Channel created successfully",
+            channel,
+            updatedUser, // Send updated user object
+        });
 
     } catch (err) {
-        console.log(err)
-        res.status(500).json({ success: false, message: "server error" })
+        console.error(err);
+        res.status(500).json({ success: false, message: "Server error" });
     }
-}
+};
+
 
 // controller for get all channels
 

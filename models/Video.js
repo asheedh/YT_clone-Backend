@@ -48,7 +48,7 @@ const videoSchema = new mongoose.Schema({
             "Movies",
             "Food",
             "Automobile",
-            "Song",
+            "Songs",
             "Finance",
             "Gaming",
             "Technology",

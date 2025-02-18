@@ -2,8 +2,6 @@ import User from "../models/User.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import path from "path";
-
 
 // controller for get all users
 
@@ -100,14 +98,14 @@ export const logIn = async (req, res) => {
             return res.status(404).json({ success: false, message: "user not found" });
         }
 
-        // 🔥 Await the password comparison
+        // Await the password comparison
         const passMatch = await bcrypt.compare(password, result.password);
 
         if (!passMatch) {
             return res.status(403).json({ success: false, message: "invalid password" });
         }
 
-        const jwtToken = jwt.sign({ email, userId: result._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const jwtToken = jwt.sign({ email, userId: result._id }, process.env.JWT_SECRET, { expiresIn: "10d" });
 
         // Remove password from the response
         const { password: userPassword, ...userWithoutPassword } = result.toObject();

@@ -22,10 +22,10 @@ const UserSchema = new mongoose.Schema({
         ref: "Channel",
     }],
 
-    channel: [{
+    channel: {
         type: mongoose.Types.ObjectId,
         ref: "Channel",
-    }]
+    }
 }, { timestamps: true })
 
 // created user model for users
