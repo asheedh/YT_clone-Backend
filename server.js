@@ -11,12 +11,7 @@ const app = express();
 const port = process.env.PORT || 5200;
 
 // middleware usage
-app.use(cors({
-    origin: "*", // Allow all origins
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    allowedHeaders: "Content-Type,Authorization"
-}));
-  
+app.use(cors())
 app.use(express.json());
 app.use("/api/users", userRoutes)
 app.use("/api/channel", channelRoutes)
